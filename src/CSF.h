@@ -37,6 +37,7 @@
 #define _CSF_H_
 #include <vector>
 #include <string>
+#include <functional>
 #include "point_cloud.h"
 #include "Cloth.h"
 
@@ -119,7 +120,7 @@ public:
 private:
 
     // Do the filtering and return the Cloth object
-    Cloth do_cloth(const ProgressCB& progressCallback);
+    Cloth do_cloth(const ProgressCB& progressCallback=nullptr);
         
 #ifdef _CSF_DLL_EXPORT_
     class __declspec (dllexport)csf::PointCloud point_cloud;
