@@ -21,8 +21,8 @@
 
 void c2cdist::calCloud2CloudDist(Cloth           & cloth,
                                  csf::PointCloud & pc,
-                                 std::vector<int>& groundIndexes,
-                                 std::vector<int>& offGroundIndexes) {
+                                 std::vector<std::size_t>& groundIndexes,
+                                 std::vector<std::size_t>& offGroundIndexes) {
     groundIndexes.resize(0);
     offGroundIndexes.resize(0);
 

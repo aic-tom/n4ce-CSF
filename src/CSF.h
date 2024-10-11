@@ -94,7 +94,7 @@ public:
     }
 
     // save points to file
-    void savePoints(std::vector<int> grp, std::string path);
+    void savePoints(std::vector<std::size_t> grp, std::string path);
 
     // get size of pointcloud
     std::size_t size() {
@@ -104,11 +104,14 @@ public:
     // PointCloud set pointcloud
     void setPointCloud(csf::PointCloud& pc);
 
+	using ProgressCB = std::function<void(float)>;
+
     // The results are index of ground points in the original
     // pointcloud and write the cloth particles coordinates
-    void do_filtering(std::vector<int>& groundIndexes,
-                      std::vector<int>& offGroundIndexes,
-                      bool exportCloth=true);
+    void do_filtering(std::vector<std::size_t>& groundIndexes,
+                      std::vector<std::size_t>& offGroundIndexes,
+                      bool exportCloth=true,
+                        const ProgressCB& progressCallback=nullptr);
     
 
     std::vector<double> do_cloth_export();
@@ -116,7 +119,7 @@ public:
 private:
 
     // Do the filtering and return the Cloth object
-    Cloth do_cloth();
+    Cloth do_cloth(const ProgressCB& progressCallback);
         
 #ifdef _CSF_DLL_EXPORT_
     class __declspec (dllexport)csf::PointCloud point_cloud;
