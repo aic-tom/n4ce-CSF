@@ -20,35 +20,35 @@
 
 
 double Rasterization::findHeightValByScanline(Particle *p, Cloth& cloth) {
-    int xpos = p->pos_x;
-    int ypos = p->pos_y;
+    int posX = p->pos_x;
+    int posY = p->pos_y;
 
-    for (int i = xpos + 1; i < cloth.num_particles_width; i++) {
-        double crresHeight = cloth.getParticle(i, ypos)->nearestPointHeight;
+    for (int i = posX + 1; i < cloth.num_particles_width; i++) {
+        double nearestHeight = cloth.getParticle(i, posY)->nearestPointHeight;
 
-        if (crresHeight > MIN_INF)
-            return crresHeight;
+        if (nearestHeight > MIN_INF)
+            return nearestHeight;
     }
 
-    for (int i = xpos - 1; i >= 0; i--) {
-        double crresHeight = cloth.getParticle(i, ypos)->nearestPointHeight;
+    for (int i = posX - 1; i >= 0; i--) {
+        double nearestHeight = cloth.getParticle(i, posY)->nearestPointHeight;
 
-        if (crresHeight > MIN_INF)
-            return crresHeight;
+        if (nearestHeight > MIN_INF)
+            return nearestHeight;
     }
 
-    for (int j = ypos - 1; j >= 0; j--) {
-        double crresHeight = cloth.getParticle(xpos, j)->nearestPointHeight;
+    for (int j = posY - 1; j >= 0; j--) {
+        double nearestHeight = cloth.getParticle(posX, j)->nearestPointHeight;
 
-        if (crresHeight > MIN_INF)
-            return crresHeight;
+        if (nearestHeight > MIN_INF)
+            return nearestHeight;
     }
 
-    for (int j = ypos + 1; j < cloth.num_particles_height; j++) {
-        double crresHeight = cloth.getParticle(xpos, j)->nearestPointHeight;
+    for (int j = posY + 1; j < cloth.num_particles_height; j++) {
+        double nearestHeight = cloth.getParticle(posX, j)->nearestPointHeight;
 
-        if (crresHeight > MIN_INF)
-            return crresHeight;
+        if (nearestHeight > MIN_INF)
+            return nearestHeight;
     }
 
     return findHeightValByNeighbor(p);
@@ -56,41 +56,37 @@ double Rasterization::findHeightValByScanline(Particle *p, Cloth& cloth) {
 
 
 double Rasterization::findHeightValByNeighbor(Particle *p) {
-    std::queue<Particle *>  nqueue;
-    std::vector<Particle *> pbacklist;
-    int neiborsize = p->neighborsList.size();
-
-    for (int i = 0; i < neiborsize; i++) {
+    std::queue<Particle *>  neighborQueue;
+    std::vector<Particle *> visitedParticles;
+    for (std::size_t i = 0; i < p->neighborsList.size(); i++) {
         p->isVisited = true;
-        nqueue.push(p->neighborsList[i]);
+        neighborQueue.push(p->neighborsList[i]);
     }
 
-    // iterate over the nqueue
-    while (!nqueue.empty()) {
-        Particle *pneighbor = nqueue.front();
-        nqueue.pop();
-        pbacklist.push_back(pneighbor);
+    // iterate over the neighborQueue
+    while (!neighborQueue.empty()) {
+        Particle *neighbor = neighborQueue.front();
+        neighborQueue.pop();
+        visitedParticles.push_back(neighbor);
 
-        if (pneighbor->nearestPointHeight > MIN_INF) {
-            for (std::size_t i = 0; i < pbacklist.size(); i++)
-                pbacklist[i]->isVisited = false;
+        if (neighbor->nearestPointHeight > MIN_INF) {
+            for (std::size_t i = 0; i < visitedParticles.size(); i++)
+                visitedParticles[i]->isVisited = false;
 
-            while (!nqueue.empty()) {
-                Particle *pp = nqueue.front();
+            while (!neighborQueue.empty()) {
+                Particle *pp = neighborQueue.front();
                 pp->isVisited = false;
-                nqueue.pop();
+                neighborQueue.pop();
             }
 
-            return pneighbor->nearestPointHeight;
+            return neighbor->nearestPointHeight;
         } else {
-            int nsize = pneighbor->neighborsList.size();
-
-            for (int i = 0; i < nsize; i++) {
-                Particle *ptmp = pneighbor->neighborsList[i];
+            for (std::size_t i = 0; i < neighbor->neighborsList.size(); i++) {
+                Particle *ptmp = neighbor->neighborsList[i];
 
                 if (!ptmp->isVisited) {
                     ptmp->isVisited = true;
-                    nqueue.push(ptmp);
+                    neighborQueue.push(ptmp);
                 }
             }
         }

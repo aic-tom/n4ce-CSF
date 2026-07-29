@@ -104,7 +104,7 @@ double Cloth::timeStep() {
     }
 
     #ifdef CSF_USE_OPENMP
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     #endif
     for (int j = 0; j < particleCount; j++) {
         particles[j].satisfyConstraintSelf(constraint_iterations);
@@ -245,7 +245,7 @@ void Cloth::movableFilter() {
                 }
 
                 if (sum > MAX_PARTICLE_FOR_POSTPROCESSIN) {
-                    std::vector<int> edgePoints = findUnmovablePoint(connected);
+                    std::vector<std::size_t> edgePoints = findUnmovablePoint(connected);
                     handle_slop_connected(edgePoints, connected, neibors);
                 }
             }
@@ -253,8 +253,8 @@ void Cloth::movableFilter() {
     }
 }
 
-std::vector<int> Cloth::findUnmovablePoint(std::vector<XY> connected) {
-    std::vector<int> edgePoints;
+std::vector<std::size_t> Cloth::findUnmovablePoint(std::vector<XY> connected) {
+    std::vector<std::size_t> edgePoints;
 
     for (std::size_t i = 0; i < connected.size(); i++) {
         int x         = connected[i].x;
@@ -334,12 +334,12 @@ std::vector<int> Cloth::findUnmovablePoint(std::vector<XY> connected) {
     return edgePoints;
 }
 
-void Cloth::handle_slop_connected(std::vector<int> edgePoints, std::vector<XY> connected, std::vector<std::vector<int> > neibors) {
+void Cloth::handle_slop_connected(std::vector<std::size_t> edgePoints, std::vector<XY> connected, std::vector<std::vector<int> > neibors) {
     std::vector<bool> visited;
 
     for (std::size_t i = 0; i < connected.size(); i++) visited.push_back(false);
 
-    std::queue<int> que;
+    std::queue<std::size_t> que;
 
     for (std::size_t i = 0; i < edgePoints.size(); i++) {
         que.push(edgePoints[i]);
@@ -347,7 +347,7 @@ void Cloth::handle_slop_connected(std::vector<int> edgePoints, std::vector<XY> c
     }
 
     while (!que.empty()) {
-        int index = que.front();
+        std::size_t index = que.front();
         que.pop();
 
         int index_center = connected[index].y * num_particles_width + connected[index].x;

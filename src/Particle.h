@@ -73,7 +73,7 @@ public:
 
     std::vector<Particle *> neighborsList;
 
-    std::vector<int> correspondingLidarPointList;
+    std::vector<std::size_t> correspondingLidarPointList;
     std::size_t nearestPointIndex;
     double nearestPointHeight;
     double tmpDist;

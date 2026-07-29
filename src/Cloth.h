@@ -148,9 +148,9 @@ public:
 
     void movableFilter();
 
-    std::vector<int> findUnmovablePoint(std::vector<XY> connected);
+    std::vector<std::size_t> findUnmovablePoint(std::vector<XY> connected);
 
-    void        handle_slop_connected(std::vector<int>          edgePoints,
+    void        handle_slop_connected(std::vector<std::size_t>  edgePoints,
                                       std::vector<XY>           connected,
                                       std::vector<std::vector<int> > neibors);
 

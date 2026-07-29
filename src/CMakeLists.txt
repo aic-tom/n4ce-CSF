@@ -26,6 +26,16 @@ add_library(CSF ${CSF_SOURCES} ${CSF_HEADERS})
 if (MSVC)
     # warning level 4 and all warnings as errors
     add_compile_options(/W4 /WX)
+    # performance flags (requires v143+ toolset for /openmp:llvm)
+    target_compile_options(CSF PRIVATE
+        /arch:AVX2
+        /fp:fast
+        /Oi
+        $<$<CONFIG:Release>:/GL>
+    )
+    target_link_options(CSF PRIVATE
+        $<$<CONFIG:Release>:/LTCG>
+    )
 else()
     # lots of warnings and all warnings as errors
     add_compile_options(-Wall -Wextra -pedantic -Werror)

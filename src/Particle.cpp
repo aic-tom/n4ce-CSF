@@ -30,29 +30,24 @@ void Particle::timeStep() {
 }
 
 void Particle::satisfyConstraintSelf(int constraintTimes) {
-    Particle *p1 = this;
+    // Immovable particles never need to move themselves.
+    if (!movable) return;
 
     for (std::size_t i = 0; i < neighborsList.size(); i++) {
         Particle *p2 = neighborsList[i];
-        Vec3 correctionVector(0, p2->pos.f[1] - p1->pos.f[1], 0);
+        // Only the Y axis is ever corrected by cloth constraints.
+        double dy = p2->pos.f[1] - pos.f[1];
 
-        if (p1->isMovable() && p2->isMovable()) {
-            // Lets make it half that length, so that we can move BOTH p1 and p2.
-            Vec3 correctionVectorHalf = correctionVector * (
-                constraintTimes > 14 ? 0.5 : doubleMove1[constraintTimes]
-            );
-            p1->offsetPos(correctionVectorHalf);
-            p2->offsetPos(-correctionVectorHalf);
-        } else if (p1->isMovable() && !p2->isMovable()) {
-            Vec3 correctionVectorHalf = correctionVector * (
-                constraintTimes > 14 ? 1 : singleMove1[constraintTimes]
-            );
-            p1->offsetPos(correctionVectorHalf);
-        } else if (!p1->isMovable() && p2->isMovable()) {
-            Vec3 correctionVectorHalf = correctionVector * (
-                constraintTimes > 14 ? 1 : singleMove1[constraintTimes]
-            );
-            p2->offsetPos(-correctionVectorHalf);
+        if (p2->isMovable()) {
+            // Both particles are movable. Apply only our half of the correction
+            // here; p2 applies its symmetric half when it runs its own pass.
+            // This makes the loop write-to-self-only and therefore race-free.
+            pos.f[1] += dy * (constraintTimes > 14 ? 0.5 : doubleMove1[constraintTimes]);
+        } else {
+            // p2 is fixed — move ourselves the full correction.
+            pos.f[1] += dy * (constraintTimes > 14 ? 1.0 : singleMove1[constraintTimes]);
         }
+        // The former "!p1->isMovable() && p2->isMovable()" branch is gone:
+        // p2 handles that case in its own pass, keeping all writes local to `this`.
     }
 }
